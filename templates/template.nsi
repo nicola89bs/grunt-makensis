@@ -7,6 +7,13 @@
 
 ;--------------------------------
 
+; Enable Unicode encoding
+Unicode True
+
+;Include Modern UI
+!include "MUI2.nsh"
+!include "FileFunc.nsh"
+
 ; The name of the installer
 Name "<%= appName %><%= setupName %>"
 
@@ -46,7 +53,7 @@ Section "<%= appName %>"
 
   ; Put file there
   <% _.each(files, function(file) { %>
-  File "<%= srcDir %><%- file %>"
+  File "/oname=<%- file %>" "<%= srcDir %><%- file %>"
   <% }) %>
   File "created_template.nsi"
 
