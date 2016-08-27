@@ -25,6 +25,10 @@ module.exports = function(grunt) {
       setupName: '_installer'
     });
 
+    if(!options.exeFile){
+      options.exeFile = options.appName + '.exe';
+    }
+
     if ( !(/\/$/.test(options.buildDir)) ) {
       options.buildDir = options.buildDir + '/';
     }
@@ -50,14 +54,7 @@ module.exports = function(grunt) {
 
     // recurse the directory
     grunt.file.recurse(options.srcDir, function(abspath, rootdir, subdir, filename) {
-      // just take the files not in locales
-      if (!subdir) {
-        dataObj.files.push(filename);
-
-        if (/\.exe/.test(filename)) {
-          dataObj.exeFile = filename;
-        }
-      }
+      dataObj.files.push(path.join(subdir || '', filename));
     });
 
     var nsiTemplate = grunt.file.read(path.join(__dirname, '..', '/templates/template.nsi'));
