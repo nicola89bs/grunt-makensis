@@ -22,7 +22,10 @@ module.exports = function(grunt) {
     var options = this.options({
       buildDir: '/',
       appName: 'Windows_App',
-      setupName: '_installer'
+      setupName: '_installer',
+      version: '0.0.0',
+      companyName: '',
+      legalUrl: ''
     });
 
     if(!options.exeFile){
@@ -35,7 +38,7 @@ module.exports = function(grunt) {
     if ( !grunt.file.exists(options.buildDir) ) {
       grunt.file.mkdir(options.buildDir);
     }
-    else {
+    else if( grunt.file.exists(options.buildDir + options.appName + options.setupName + '.exe') ){
       grunt.file.delete(options.buildDir + options.appName + options.setupName + '.exe');
     }
 

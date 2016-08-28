@@ -8,7 +8,7 @@
 ;--------------------------------
 
 ; Enable Unicode encoding
-Unicode True
+;Unicode True
 
 ;Include Modern UI
 !include "MUI2.nsh"
@@ -16,6 +16,17 @@ Unicode True
 
 ; The name of the installer
 Name "<%= appName %><%= setupName %>"
+
+; Other infos
+Caption "<%= appName %><%= version %>"
+BrandingText "<%= appName %><%= version %>"
+VIAddVersionKey "ProductName" "<%= appName %>"
+VIAddVersionKey "ProductVersion" "<%= version %>"
+VIAddVersionKey "FileDescription" "<%= appName %> <%= version %> Installer"
+VIAddVersionKey "FileVersion" "<%= version %>"
+VIAddVersionKey "CompanyName" "<%= companyName %>"
+VIAddVersionKey "LegalCopyright" "<%= legalUrl %>"
+VIProductVersion "<%= version %>.0"
 
 ; The file to write
 OutFile "<%= buildDir %><%= appName %><%= setupName %>.exe"
@@ -32,14 +43,33 @@ RequestExecutionLevel admin
 
 ;--------------------------------
 
-; Pages
+; Define UI settings
+; http://nsis.sourceforge.net/Docs/Modern%20UI/Readme.html
 
-Page components
-Page directory
-Page instfiles
+;!define MUI_UI_HEADERIMAGE_RIGHT "..\Icon.iconset\icon_256x256.png"
+;!define MUI_ICON "..\icon_win.ico"
+;!define MUI_UNICON "..\icon_win.ico"
+;!define MUI_WELCOMEFINISHPAGE_BITMAP ""
+;!define MUI_UNWELCOMEFINISHPAGE_BITMAP ""
+!define MUI_ABORTWARNING
+!define MUI_FINISHPAGE_RUN "$INSTDIR\<%= exeFile %>"
+!define MUI_FINISHPAGE_RUN_TEXT "Start <%= appName %>"
 
-UninstPage uninstConfirm
-UninstPage instfiles
+;Define the pages
+;!insertmacro MUI_PAGE_WELCOME
+;!insertmacro MUI_PAGE_LICENSE "../License.txt"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+;Define uninstall pages
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
+
+;Load Language Files
+!insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
 
@@ -51,10 +81,23 @@ Section "<%= appName %>"
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
 
+  ; Remove registry keys
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\<%= appName %>"
+  DeleteRegKey HKLM SOFTWARE\NSIS_<%= appName %>
+
+  ; Remove files and uninstaller
+  Delete $INSTDIR\<%= appName %>.nsi
+  Delete $INSTDIR\uninstall.exe
+
+  ; Remove shortcuts, if any
+  Delete "$SMPROGRAMS\<%= appName %>\*.*"
+
+  ; Remove directories used
+  RMDir /r "$SMPROGRAMS\<%= appName %>"
+  RMDir /r "$INSTDIR"
+
   ; Put file there
-  <% _.each(files, function(file) { %>
-  File "/oname=<%- file %>" "<%= srcDir %><%- file %>"
-  <% }) %>
+  File /r "<%= srcDir.replace(/\//g,'\\') %>"
   File "created_template.nsi"
 
   ; Write the installation path into the registry
@@ -78,6 +121,13 @@ Section "Start Menu Shortcuts"
 
 SectionEnd
 
+; Optional section (can be disabled by the user)
+Section "Desktop Shortcut"
+
+  CreateShortcut "$DESKTOP\<%= appName %>.lnk" "$INSTDIR\<%= exeFile %>" "" "$INSTDIR\<%= exeFile %>" 0
+
+SectionEnd
+
 ;--------------------------------
 
 ; Uninstaller
@@ -94,10 +144,11 @@ Section "Uninstall"
 
   ; Remove shortcuts, if any
   Delete "$SMPROGRAMS\<%= appName %>\*.*"
+  Delete "$DESKTOP\<%= appName %>.lnk" 
 
   ; Remove directories used
-  RMDir "$SMPROGRAMS\<%= appName %>"
-  RMDir "$INSTDIR"
+  RMDir /r "$SMPROGRAMS\<%= appName %>"
+  RMDir /r "$INSTDIR"
 
 SectionEnd
 
