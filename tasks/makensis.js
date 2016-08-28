@@ -25,7 +25,8 @@ module.exports = function(grunt) {
       setupName: '_installer',
       version: '0.0.0',
       companyName: '',
-      legalUrl: ''
+      legalUrl: '',
+      setFilePermission: []
     });
 
     if(!options.exeFile){

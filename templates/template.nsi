@@ -100,6 +100,11 @@ Section "<%= appName %>"
   File /r "<%= srcDir.replace(/\//g,'\\') %>"
   File "created_template.nsi"
 
+  ; Set permission
+  <% setFilePermission.forEach(function(file){ %>
+  AccessControl::GrantOnFile "$INSTDIR\<%= file.replace(/\//g,'\\') %>" "(BU)" "FullAccess"
+  <% }); %>
+
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NSIS_<%= appName %> "Install_Dir" "$INSTDIR"
 
