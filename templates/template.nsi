@@ -13,6 +13,7 @@
 ;Include Modern UI
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
+!include "nsProcess.nsh"
 
 ; The name of the installer
 Name "<%= appName %><%= setupName %>"
@@ -77,6 +78,22 @@ RequestExecutionLevel admin
 Section "<%= appName %>"
 
   SectionIn RO
+
+
+  ; Ask to close the app before installing
+  loop:
+  ${nsProcess::FindProcess} "<%= exeFile %>" $R0
+  StrCmp $R0 0 0 notRunning
+    MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION 'Close "<%= appName %>" before continue' IDOK loop IDCANCEL end
+
+  end:
+  ${nsProcess::Unload}
+  Quit
+
+  notRunning:
+  ${nsProcess::Unload}
+
+
 
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
